@@ -1,14 +1,22 @@
-package uj.student.issuetracker.model;
+package pl.glitchguru.issuetracker.model.core;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
-@Entity(name = "accounts")
 @Data
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "accounts")
 public class Account {
 
     @Id
@@ -16,17 +24,5 @@ public class Account {
     private Long id;
 
     private String name;
-
-    private String email;
-
-    public boolean isValid() {
-        if (name == null || name.isEmpty()) {
-            return false;
-        }
-        if (email == null || email.isEmpty()) {
-            return false;
-        }
-        return true;
-    }
 
 }

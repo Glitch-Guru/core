@@ -1,8 +1,8 @@
-package uj.student.issuetracker.repository;
+package pl.glitchguru.issuetracker.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import uj.student.issuetracker.model.Account;
+import pl.glitchguru.issuetracker.model.core.Account;
 
 @Repository
 public interface AccountRepository extends CrudRepository<Account, Long> {
