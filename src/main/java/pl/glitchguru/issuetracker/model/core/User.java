@@ -1,14 +1,10 @@
 package pl.glitchguru.issuetracker.model.core;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.glitchguru.issuetracker.model.authentication.AccountAuthority;
 import pl.glitchguru.issuetracker.model.authentication.Role;
 import pl.glitchguru.issuetracker.model.authentication.Token;
 
@@ -16,8 +12,13 @@ import java.util.Collection;
 import java.util.List;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static java.util.Collections.singleton;
 
-@Data
+
+
+@Getter
+@Setter
+@ToString
 @Entity
 @Builder
 @NoArgsConstructor
@@ -29,27 +30,25 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Account account;
-
     private String firstName;
 
     private String lastName;
 
     private String email;
 
+    @ToString.Exclude
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Token> tokens;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()), new AccountAuthority(account));
-
+        return singleton(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
@@ -77,4 +76,3 @@ public class User implements UserDetails {
         return true;
     }
 }
-

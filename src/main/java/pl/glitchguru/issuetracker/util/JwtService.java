@@ -13,10 +13,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import pl.glitchguru.issuetracker.model.core.User;
 
+import static java.util.Collections.singletonMap;
+
 @Service
 public class JwtService {
-
-    public static final String ACCOUNT_ID = "account_id";
 
     public static final String ROLE = "role";
 
@@ -32,7 +32,7 @@ public class JwtService {
     }
 
     public String generateToken(User user) {
-        return generateToken(user, Map.of(ACCOUNT_ID, user.getAccount().getId(), ROLE, user.getRole()));
+        return generateToken(user, singletonMap(ROLE, user.getRole()));
     }
 
     public String generateToken(

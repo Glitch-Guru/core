@@ -2,31 +2,29 @@ package pl.glitchguru.issuetracker.service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.glitchguru.issuetracker.controller.request.RegisterUserAndAccountRequest;
+import pl.glitchguru.issuetracker.controller.request.RegisterUserRequest;
 import pl.glitchguru.issuetracker.model.authentication.AuthenticationRequest;
 import pl.glitchguru.issuetracker.model.authentication.AuthenticationResponse;
 import pl.glitchguru.issuetracker.model.authentication.Token;
-import pl.glitchguru.issuetracker.model.core.Account;
 import pl.glitchguru.issuetracker.model.core.User;
-import pl.glitchguru.issuetracker.repository.AccountRepository;
 import pl.glitchguru.issuetracker.repository.TokenRepository;
 import pl.glitchguru.issuetracker.repository.UserRepository;
 import pl.glitchguru.issuetracker.util.JwtService;
 
 import static pl.glitchguru.issuetracker.model.authentication.Role.*;
-import static pl.glitchguru.issuetracker.model.authentication.AccountContext.getCurrentAccountId;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationService {
 
     private final UserRepository userRepository;
-
-    private final AccountRepository accountRepository;
 
     private final TokenRepository tokenRepository;
 
@@ -36,26 +34,24 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse registerAndCreateNewAccount(RegisterUserAndAccountRequest request) {
-        final var account = Account.builder()
-                .name(request.accountName())
-                .build();
-
-        final var savedAccount = accountRepository.save(account);
+    public AuthenticationResponse registerAndCreateNewUser(RegisterUserRequest request) {
+        if (userRepository.existsByEmailIgnoreCase(request.email())) {
+            throw new IllegalArgumentException("User with given email already exists");
+        }
 
         final var user = User.builder()
-                .account(savedAccount)
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .role(ADMIN)
+                .role(USER)
                 .build();
 
         final var savedUser = userRepository.save(user);
         final var jwtToken = jwtService.generateToken(user);
 
         saveUserToken(savedUser, jwtToken);
+        log.info("Created new user: {}", savedUser);
         return new AuthenticationResponse(jwtToken);
     }
 
@@ -66,8 +62,9 @@ public class AuthenticationService {
                         request.password()
                 )
         );
-        final var user = userRepository.findByEmailIgnoreCaseAndAccount_Id(request.email(), getCurrentAccountId())
-                .orElseThrow();
+
+        final var user = userRepository.findByEmailIgnoreCase(request.email())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         final var jwtToken = jwtService.generateToken(user);
 
@@ -78,12 +75,13 @@ public class AuthenticationService {
     }
 
     private void saveUserToken(User user, String jwtToken) {
-        var token = Token.builder()
+        final var token = Token.builder()
                 .user(user)
                 .token(jwtToken)
                 .expired(false)
                 .revoked(false)
                 .build();
+
         tokenRepository.save(token);
     }
 
