@@ -23,8 +23,12 @@ public class TicketService {
     private static final String DEFAULT_TICKET_CREATION_STATUS = "Open";
 
     public TicketResponse createTicket(TicketCreationRequest ticketCreationRequest, User reporter) {
-        final User assignee = userRepository.findById(ticketCreationRequest.assigneeId())
-                                            .orElseThrow(() -> new RuntimeException("User not found"));
+        User assignee = reporter;
+
+        if (ticketCreationRequest.assigneeId() != null) {
+            assignee = userRepository.findById(ticketCreationRequest.assigneeId())
+                                     .orElseThrow(() -> new RuntimeException("User not found"));
+        }
 
         final Ticket ticket = Ticket.builder()
                                     .title(ticketCreationRequest.title())
