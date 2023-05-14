@@ -16,27 +16,23 @@ public class LogoutService implements LogoutHandler {
 
     private final TokenRepository tokenRepository;
 
+    private static final String BEARER = "Bearer ";
+
     @Override
-    public void logout(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Authentication authentication
-    ) {
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         final String authHeader = request.getHeader("Authorization");
-        if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith(BEARER)) {
             return;
         }
 
-        final String jwt = authHeader.substring(7);
-        var storedToken = tokenRepository.findByToken(jwt)
-                .orElse(null);
+        final String jwt = authHeader.substring(BEARER.length() - 1); // subtract one because index starts from 0
+        tokenRepository.findByToken(jwt).ifPresent(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
 
-        if (storedToken != null) {
-            storedToken.setExpired(true);
-            storedToken.setRevoked(true);
-
-            tokenRepository.save(storedToken);
+            tokenRepository.save(token);
             SecurityContextHolder.clearContext();
-        }
+        });
+
     }
 }
