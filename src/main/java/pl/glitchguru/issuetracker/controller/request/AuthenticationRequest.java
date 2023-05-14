@@ -1,4 +1,4 @@
-package pl.glitchguru.issuetracker.model.authentication;
+package pl.glitchguru.issuetracker.controller.request;
 
 public record AuthenticationRequest(String email, String password) {
 

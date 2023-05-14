@@ -18,6 +18,7 @@ public class Token {
     private Long id;
 
     @Column(unique = true)
+    @ToString.Exclude
     private String token;
 
     private boolean revoked;

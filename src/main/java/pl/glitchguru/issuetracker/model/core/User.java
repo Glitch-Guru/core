@@ -14,8 +14,6 @@ import java.util.List;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static java.util.Collections.singleton;
 
-
-
 @Getter
 @Setter
 @ToString
@@ -34,6 +32,7 @@ public class User implements UserDetails {
 
     private String lastName;
 
+    @Column(unique = true)
     private String email;
 
     @ToString.Exclude

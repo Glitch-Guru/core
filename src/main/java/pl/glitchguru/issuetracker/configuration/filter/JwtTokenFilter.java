@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pl.glitchguru.issuetracker.model.authentication.Token;
 import pl.glitchguru.issuetracker.repository.TokenRepository;
 import pl.glitchguru.issuetracker.util.JwtService;
 
@@ -46,11 +47,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     .map(t -> !t.isExpired() && !t.isRevoked())
                     .orElse(false);
 
-            if (isTokenValid && jwtService.isTokenValid(jwt)) {
+            final var user = token.map(Token::getUser)
+                                  .orElse(null);
+
+            if (isTokenValid && jwtService.isTokenValid(jwt) && user != null) {
                 final var authToken = new UsernamePasswordAuthenticationToken(
-                        token.get(),
+                        user,
                         null,
-                        token.get().getUser().getAuthorities()
+                        user.getAuthorities()
                 );
 
                 authToken.setDetails(
