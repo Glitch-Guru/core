@@ -1,4 +1,4 @@
-package uj.student.issuetracker;
+package pl.glitchguru.issuetracker;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
