@@ -26,6 +26,7 @@ dependencies {
 	implementation("com.h2database:h2:2.1.214")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	implementation("com.google.guava:guava:31.1-jre")
 
 	compileOnly("org.projectlombok:lombok")
 

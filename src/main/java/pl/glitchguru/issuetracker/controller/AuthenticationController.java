@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.glitchguru.issuetracker.controller.request.RegisterUserRequest;
-import pl.glitchguru.issuetracker.model.authentication.AuthenticationRequest;
-import pl.glitchguru.issuetracker.model.authentication.AuthenticationResponse;
+import pl.glitchguru.issuetracker.controller.request.AuthenticationRequest;
+import pl.glitchguru.issuetracker.controller.response.AuthenticationResponse;
 import pl.glitchguru.issuetracker.service.AuthenticationService;
 
 @RestController
