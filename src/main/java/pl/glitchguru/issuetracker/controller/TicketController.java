@@ -6,11 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pl.glitchguru.issuetracker.controller.request.TicketCreationRequest;
+import pl.glitchguru.issuetracker.controller.request.TicketUpdateRequest;
 import pl.glitchguru.issuetracker.controller.response.TicketResponse;
 import pl.glitchguru.issuetracker.model.core.User;
 import pl.glitchguru.issuetracker.service.TicketService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/tickets")
@@ -41,6 +43,31 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getAllTickets());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TicketResponse> getAllTickets(@PathVariable Long id) {
+        Optional<TicketResponse> ticket = ticketService.getTicket(id);
+        return ticket.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<TicketResponse> updateTicket(
+            @PathVariable Long id,
+            @RequestBody TicketUpdateRequest request) {
+        boolean isTicketFound = ticketService.updateTicket(id, request);
+        if (isTicketFound) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
+        boolean isTicketFound = ticketService.deleteTicket(id);
+        if (isTicketFound) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 
 }

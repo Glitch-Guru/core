@@ -11,6 +11,7 @@ import pl.glitchguru.issuetracker.model.core.User;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "tokens")
 public class Token {
 
     @Id
