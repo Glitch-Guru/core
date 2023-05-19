@@ -12,7 +12,6 @@ import pl.glitchguru.issuetracker.model.core.User;
 import pl.glitchguru.issuetracker.service.TicketService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/tickets")
@@ -44,9 +43,8 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TicketResponse> getAllTickets(@PathVariable Long id) {
-        Optional<TicketResponse> ticket = ticketService.getTicket(id);
-        return ticket.map(ResponseEntity::ok)
+    public ResponseEntity<TicketResponse> getTicket(@PathVariable Long id) {
+        return ticketService.getTicket(id).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -54,7 +52,7 @@ public class TicketController {
     public ResponseEntity<TicketResponse> updateTicket(
             @PathVariable Long id,
             @RequestBody TicketUpdateRequest request) {
-        boolean isTicketFound = ticketService.updateTicket(id, request);
+        final boolean isTicketFound = ticketService.updateTicket(id, request);
         if (isTicketFound) {
             return ResponseEntity.noContent().build();
         }
@@ -63,7 +61,7 @@ public class TicketController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
-        boolean isTicketFound = ticketService.deleteTicket(id);
+        final boolean isTicketFound = ticketService.deleteTicket(id);
         if (isTicketFound) {
             return ResponseEntity.noContent().build();
         }

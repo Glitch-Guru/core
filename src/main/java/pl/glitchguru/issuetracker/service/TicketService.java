@@ -2,7 +2,6 @@ package pl.glitchguru.issuetracker.service;
 
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import pl.glitchguru.issuetracker.controller.request.TicketCreationRequest;
 import pl.glitchguru.issuetracker.controller.request.TicketUpdateRequest;
@@ -26,18 +25,13 @@ public class TicketService {
     private static final String DEFAULT_TICKET_CREATION_STATUS = "Open";
 
     public TicketResponse createTicket(TicketCreationRequest ticketCreationRequest, User reporter) {
-        User assignee = reporter;
-
-        if (ticketCreationRequest.assigneeId() != null) {
-            assignee = userRepository.findById(ticketCreationRequest.assigneeId())
-                                     .orElseThrow(() -> new RuntimeException("User not found"));
-        }
+        final Optional<User> assignee = getAssignee(ticketCreationRequest.assigneeId());
 
         final Ticket ticket = Ticket.builder()
                                     .title(ticketCreationRequest.title())
                                     .description(ticketCreationRequest.description())
                                     .status(ticketCreationRequest.status() == null ? DEFAULT_TICKET_CREATION_STATUS : ticketCreationRequest.status())
-                                    .assignee(assignee)
+                                    .assignee(assignee.orElse(reporter))
                                     .reporter(reporter)
                                     .build();
 
@@ -60,20 +54,20 @@ public class TicketService {
     }
 
     public boolean updateTicket(Long id, TicketUpdateRequest ticketUpdateRequest) {
-        Optional<Ticket> optionalTicket = ticketRepository.findById(id);
+        final Optional<Ticket> optionalTicket = ticketRepository.findById(id);
         if (optionalTicket.isEmpty()) {
             return false;
         }
 
-        Ticket ticket = optionalTicket.get();
-        User assignee = getAssignee(ticketUpdateRequest);
+        final Ticket ticket = optionalTicket.get();
+        final Optional<User> assignee = getAssignee(ticketUpdateRequest.assigneeId());
 
-        Ticket updatedTicket = Ticket.builder()
+        final Ticket updatedTicket = Ticket.builder()
                 .id(id)
                 .title(ticketUpdateRequest.title() == null ? ticket.getTitle() : ticketUpdateRequest.title())
                 .description(ticketUpdateRequest.description() == null ? ticket.getDescription() : ticketUpdateRequest.description())
                 .status(ticketUpdateRequest.status() == null ? ticket.getStatus() : ticketUpdateRequest.status())
-                .assignee(assignee)
+                .assignee(assignee.orElse(null))
                 .reporter(ticket.getReporter())
                 .build();
 
@@ -82,14 +76,12 @@ public class TicketService {
         return true;
     }
 
-    @Nullable
-    private User getAssignee(TicketUpdateRequest ticketUpdateRequest) {
-        User assignee = null;
-        if (ticketUpdateRequest.assigneeId() != null) {
-            assignee = userRepository.findById(ticketUpdateRequest.assigneeId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+    private Optional<User> getAssignee(Long assigneeId) {
+        if (assigneeId != null) {
+            return Optional.of(userRepository.findById(assigneeId)
+                    .orElseThrow(() -> new RuntimeException("User not found")));
         }
-        return assignee;
+        return Optional.empty();
     }
 
     public boolean deleteTicket(Long id) {
