@@ -25,7 +25,7 @@ public class TicketService {
     private static final String DEFAULT_TICKET_CREATION_STATUS = "Open";
 
     public TicketResponse createTicket(TicketCreationRequest ticketCreationRequest, User reporter) {
-        final Optional<User> assignee = getAssignee(ticketCreationRequest.assigneeId());
+        final Optional<User> assignee = getUser(ticketCreationRequest.assigneeId());
 
         final Ticket ticket = Ticket.builder()
                                     .title(ticketCreationRequest.title())
@@ -60,14 +60,14 @@ public class TicketService {
         }
 
         final Ticket ticket = optionalTicket.get();
-        final Optional<User> assignee = getAssignee(ticketUpdateRequest.assigneeId());
+        final Optional<User> assignee = getUser(ticketUpdateRequest.assigneeId());
 
         final Ticket updatedTicket = Ticket.builder()
                 .id(id)
                 .title(ticketUpdateRequest.title() == null ? ticket.getTitle() : ticketUpdateRequest.title())
                 .description(ticketUpdateRequest.description() == null ? ticket.getDescription() : ticketUpdateRequest.description())
                 .status(ticketUpdateRequest.status() == null ? ticket.getStatus() : ticketUpdateRequest.status())
-                .assignee(assignee.orElse(null))
+                .assignee(assignee.orElse(ticket.getAssignee()))
                 .reporter(ticket.getReporter())
                 .build();
 
@@ -76,7 +76,7 @@ public class TicketService {
         return true;
     }
 
-    private Optional<User> getAssignee(Long assigneeId) {
+    private Optional<User> getUser(Long assigneeId) {
         if (assigneeId != null) {
             return Optional.of(userRepository.findById(assigneeId)
                     .orElseThrow(() -> new RuntimeException("User not found")));
