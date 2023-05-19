@@ -76,9 +76,9 @@ public class TicketService {
         return true;
     }
 
-    private Optional<User> getUser(Long assigneeId) {
-        if (assigneeId != null) {
-            return Optional.of(userRepository.findById(assigneeId)
+    private Optional<User> getUser(Long userId) {
+        if (userId != null) {
+            return Optional.of(userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found")));
         }
         return Optional.empty();
